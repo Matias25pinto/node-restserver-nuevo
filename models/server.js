@@ -1,4 +1,5 @@
 const express = require("express");
+const { dbConnection } = require("../database/config");
 var cors = require("cors");
 
 class Server {
@@ -6,6 +7,9 @@ class Server {
     this.app = express();
     this.port = process.env.PORT;
     this.usuariosPath = "/api/usuarios";
+
+    //Conectar a la BD
+    this.conectarBD();
     //Middlewares
     this.middleware();
 
@@ -13,7 +17,12 @@ class Server {
     this.routes();
   }
 
+  async conectarBD() {
+    await dbConnection();
+  }
+
   routes() {
+    //Ruta de usuarios
     this.app.use(this.usuariosPath, require("../routes/usuarios"));
   }
 
@@ -21,7 +30,7 @@ class Server {
     //CORS, es un middleware para gestionar el acceso a la api los navegadores lo piden de manera obligatoria
     this.app.use(cors());
 
-    //JSON, es un middleware que lee y luego parse lo enviado en el body a un objeto json
+    //JSON, es un middleware que lee y luego parsea lo enviado en el body a un objeto json
     this.app.use(express.json());
 
     //Es un middleware que permite hacer publica una carpeta

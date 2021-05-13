@@ -1,54 +1,76 @@
 const { response } = require("express");
+const bcryptjs = require("bcryptjs"); //bcryptjs es distinto a bcrypt
 
-const usuariosGet = (req, res = response) => {
-  //enviar un html con send
-  //res.send("Hello from Class");
+const Usuario = require("../models/usuario");
+
+const usuariosGet = async (req, res = response) => {
+  let { limite = 5, desde = 0 } = req.query; //Extraer los argumentos
+  const query = { estado: true };
+  limite = parseInt(limite); //Convertir el query en number
+  desde = parseInt(desde);
+  //Promise.all, se utiliza cuando debo ejecutar mas de una promesa de esta forma se ejecutan al mismo tiempo,
+  //y no se debe estar esperando que una promesa termine para que se ejecute la siguiente
+  //Desestructuración de arreglos
+  const [total, usuarios] = await Promise.all([
+    Usuario.countDocuments(query),
+    Usuario.find(query).skip(desde).limit(limite),
+  ]);
+
   res.json({
-    ok: true,
-    msg: "get API-Controlador",
+    total,
+    usuarios,
   });
 };
 
-const usuariosPost = (req, res = response) => {
-  const { name, age } = req.body;
-  res.json({
-    ok: true,
-    msg: "post API-Controlador",
-    name,
-    age,
-  });
-};
+const usuariosPost = async (req, res = response) => {
+  const { nombre, correo, password, rol } = req.body;
 
-const usuariosPut = (req, res = response) => {
-  //parametro de entorno
-  const { id } = req.params;
-  //querys params
-  const {
-    saludo,
-    nombre = "no hay nombre",
-    edad,
-    pages = 1,
-    limit = 1,
-  } = req.query;
-  res.json({
-    ok: true,
-    msg: "put API-Controlador",
-    id,
-    saludo,
+  //Crear Objeto usuario
+  usuario = new Usuario({
     nombre,
-    edad,
-    pages,
-    limit,
+    correo,
+    password,
+    rol,
+  });
+
+  //Encriptar la contraseña
+  const salt = bcryptjs.genSaltSync(); //el numero de vueltas para encriptar 10, es por defecto
+  usuario.password = bcryptjs.hashSync(password, salt); //para encriptar en una sola via
+  //Grabar en la BD
+  await usuario.save();
+
+  res.json({
+    usuario,
   });
 };
 
-const usuariosDelete = (req, res = response) => {
-  //enviar un html con send
-  //res.send("Hello from Class");
-  res.json({
-    ok: true,
-    msg: "delete API-Controlador",
-  });
+const usuariosPut = async (req, res = response) => {
+  const { id } = req.params; //extraer parametro del url
+  //Sacar password, google, correo y actualizar el resto
+  const { _id, password, google, correo, ...resto } = req.body;
+
+  //Validar contra BD
+  if (password) {
+    //Encriptar password
+    const salt = bcryptjs.genSaltSync();
+    //Se crea la propiedad password en resto
+    resto.password = bcryptjs.hashSync(password, salt);
+  }
+
+  const usuario = await Usuario.findByIdAndUpdate(id, resto, { new: true });
+  res.json({ usuario });
+};
+
+const usuariosDelete = async (req, res = response) => {
+  const { id } = req.params;
+
+  //cambiar el estado del usuario para eliminar
+  const usuario = await Usuario.findByIdAndUpdate(
+    id,
+    { estado: false },
+    { new: true }
+  );
+  res.json({ usuario });
 };
 
 module.exports = {
