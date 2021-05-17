@@ -3,16 +3,16 @@ const { dbConnection } = require("../database/config");
 var cors = require("cors");
 
 class Server {
+  
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
     this.usuariosPath = "/api/usuarios";
-
+    this.authPath     = "/api/auth";
     //Conectar a la BD
     this.conectarBD();
     //Middlewares
     this.middleware();
-
     //Rutas
     this.routes();
   }
@@ -22,6 +22,8 @@ class Server {
   }
 
   routes() {
+    //Ruta de auth
+    this.app.use(this.authPath, require("../routes/auth"));
     //Ruta de usuarios
     this.app.use(this.usuariosPath, require("../routes/usuarios"));
   }

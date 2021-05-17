@@ -1,4 +1,4 @@
-const { response } = require("express");
+const { response } = require("express"); //utilizamos response de esta forma la peticion termina automaticamente se envia el res, de lo contrario se tendria que usar res.end; para terminar la conexion
 const bcryptjs = require("bcryptjs"); //bcryptjs es distinto a bcrypt
 
 const Usuario = require("../models/usuario");
@@ -63,6 +63,7 @@ const usuariosPut = async (req, res = response) => {
 
 const usuariosDelete = async (req, res = response) => {
   const { id } = req.params;
+  const usuarioAutenticado = req.usuario;
 
   //cambiar el estado del usuario para eliminar
   const usuario = await Usuario.findByIdAndUpdate(
@@ -70,7 +71,7 @@ const usuariosDelete = async (req, res = response) => {
     { estado: false },
     { new: true }
   );
-  res.json({ usuario });
+  res.json({ usuario, usuarioAutenticado });
 };
 
 module.exports = {
