@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuario");
 
 const validarJWT = async (req = request, res = response, next) => {
-  const token = req.header("token");
+  const token = req.header("token");//para acceder a elementos del header
 
   if (!token) {
     return res.status(400).json({
@@ -32,7 +32,7 @@ const validarJWT = async (req = request, res = response, next) => {
       });
     }
 
-    req.usuario = usuario;
+    req.usuario = usuario;// creo la propiedad usuario dentro de req
     next();
   } catch (err) {
     console.log(err);

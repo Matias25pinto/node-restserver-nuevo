@@ -1,4 +1,3 @@
-// Using Node.js `require()`
 const mongoose = require("mongoose");
 
 const dbConnection = async () => {

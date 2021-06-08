@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const generarJWT = async (uid = "") => {
   return new Promise((resolve, reject) => {
     const payload = { uid };
-
     jwt.sign(
       payload,
       process.env.SECRETORPRIVATEKEY,
@@ -12,7 +11,6 @@ const generarJWT = async (uid = "") => {
       },
       (err, token) => {
         if (err) {
-          console.log(err);
           reject("No se pudo generar el Token");
         } else {
           resolve(token);
@@ -21,5 +19,4 @@ const generarJWT = async (uid = "") => {
     );
   });
 };
-
 module.exports = { generarJWT };
