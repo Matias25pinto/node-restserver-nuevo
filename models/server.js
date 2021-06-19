@@ -1,4 +1,5 @@
 const express = require("express");
+const fileUpload = require("express-fileupload");
 const { dbConnection } = require("../database/config");
 var cors = require("cors");
 
@@ -11,6 +12,7 @@ class Server {
     this.categoriasPath = "/api/categorias";
     this.productosPath = "/api/productos";
     this.buscarPath = "/api/buscar";
+    this.uploadsPath = "/api/uploads";
     //Conectar a la BD
     this.conectarBD();
     //Middlewares
@@ -37,6 +39,9 @@ class Server {
 
     //Rutas de buscar
     this.app.use(this.buscarPath, require("../routes/buscar"));
+
+    //Rutas uploads
+    this.app.use(this.uploadsPath, require("../routes/uploads"));
   }
 
   middleware() {
@@ -48,6 +53,15 @@ class Server {
 
     //Es un middleware que permite hacer publica una carpeta
     this.app.use(express.static("public"));
+
+    //Fileupload - Carga de archivos
+    // Note that this option available for versions 1.0.0 and newer.
+    this.app.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: "/tmp/",
+      })
+    );
   }
 
   listen() {
